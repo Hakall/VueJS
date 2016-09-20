@@ -1,0 +1,38 @@
+{
+    "code": "Ok",
+    "message": "Method(s) found",
+    "methods": {
+        "__v": 2,
+        "_id": "57986fd12f531283395da163",
+        "push": {
+            "serverKey": "AIzaSyAVz-ebB4QQYvqRnZVf3i7ZxQn8ZBWxNeM",
+            "activate": true,
+            "transports": ["push"]
+        },
+        "bypass": {
+            "activate": true,
+            "codes_number": 10,
+            "code_type": "digit",
+            "code_length": 6,
+            "transports": []
+        },
+        "random_code": {
+            "activate": true,
+            "code_length": 6,
+            "code_type": "digit",
+            "mail_validity": 30,
+            "sms_validity": 15,
+            "transports": ["mail", "sms"]
+        },
+        "totp": {
+            "activate": true,
+            "app_window": 2,
+            "default_window": 2,
+            "mail_window": 15,
+            "sms_window": 6,
+            "transports": ["sms"]
+        }
+    },
+    "uid": "john",
+    "api_url": "http://casotp.univ-lr.fr:3000/"
+}
