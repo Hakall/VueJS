@@ -16,22 +16,41 @@
 var UserDashboard = Vue.extend({
     props: {
         'methods': Object,
+        'user': Object,
         'currentmethod': String
     },
-    template: '<div><div class="section" v-for="method in methods" v-show="method.activate && currentmethod==method.name">' +
+    template: '<div>' +
+        '<div class="section" v-for="method in methods" v-show="method.activate && currentmethod==method.name">' +
         '<h5>{{method.name}}</h5>' +
-        '</div></div>'
+        '</div>' +
+        '<div class="divider"></div>'+
+        '<div class="section" v-show="methods[currentmethod].transports.length>0 && currentmethod!==\'push\' " >'+
+        '<h5>Transports</h5>'+
+        '<div v-if="user.transports.sms">'+
+        'Sms : {{user.transports.sms}}'+
+        '</div>'+
+        '<div v-if="user.transports.mail">'+
+        'Mail : {{user.transports.mail}}'+
+        '</div>'+
+        '</div>'+
+        '</div>'
 });
 
 var ManagerDashboard = Vue.extend({
-	props: {
-        'methods': Object
+    props: {
+        'methods': Object,
+        'uids': Array,
     },
     template: '<div>ManagerDashboard!</div>'
 });
 
 var AdminDashboard = Vue.extend({
-    template: '<div>AdminDashboard!</div>'
+    props: {
+        'methods': Object
+    },
+    template: '<div><div class="section" v-for="method in methods">' +
+        '<h5>{{method.name}}</h5>' +
+        '<div class="divider"></div></div></div>'
 });
 
 //Vue.component('user-dashboard', UserDashboard);
@@ -46,41 +65,17 @@ var app = new Vue({
     data: {
         currentView: 'user-dashboard',
         currentMethod: '',
-        methods: {
-            "__v": 2,
-            "_id": "57986fd12f531283395da163",
-            "push": {
-                "serverKey": "AIzaSyAVz-ebB4QQYvqRnZVf3i7ZxQn8ZBWxNeM",
-                "activate": true,
-                "transports": ["push"]
-            },
-            "bypass": {
-                "activate": true,
-                "codes_number": 10,
-                "code_type": "digit",
-                "code_length": 6,
-                "transports": []
-            },
-            "random_code": {
-                "activate": false,
-                "code_length": 6,
-                "code_type": "digit",
-                "mail_validity": 30,
-                "sms_validity": 15,
-                "transports": ["mail", "sms"]
-            },
-            "totp": {
-                "activate": false,
-                "app_window": 2,
-                "default_window": 2,
-                "mail_window": 15,
-                "sms_window": 6,
-                "transports": ["sms"]
-            }
-        }
+        methods: {},
+        user: {
+            uid: '',
+            methods: {},
+            transports: {}
+        },
+        uids: []
     },
     created: function() {
-        this.cleanMethods();
+        this.getUser();
+        this.getMethods();
     },
     methods: {
         cleanMethods: function() {
@@ -89,9 +84,68 @@ var app = new Vue({
                 else this.methods[method].name = method;
             }
         },
+
         navigate: function(event) {
             this.currentMethod = event.target.text;
             this.currentView = event.target.name + '-dashboard';
-        }
+            if (event.target.name == "manager") this.getUsers();
+        },
+
+        getUsers: function() {
+            $.ajax({
+                url: "/data/users.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    this.setUsers(data);
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("/data/users.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+
+        setUsers: function(data) {
+            this.uids = data.uids;
+        },
+
+        getUser: function() {
+            $.ajax({
+                url: "/data/user.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    this.setUser(data);
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("/data/user.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+
+        setUser: function(data) {
+            this.user.uid = data.uid;
+            this.user.methods = data.user.methods;
+            this.user.transports = data.user.transports;
+        },
+
+        getMethods: function() {
+            $.ajax({
+                url: "/data/methods.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    this.setMethods(data);
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("/data/methods.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+
+        setMethods: function(data) {
+            this.methods = data.methods;
+            this.cleanMethods();
+        },
     }
 })

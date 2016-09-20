@@ -38,7 +38,9 @@
             </ul>
         </header>
         <main>
-        	<component :is="currentView" v-bind:methods=methods v-bind:currentmethod=currentMethod></component>
+        	<div class="container">
+        		<component :is="currentView" v-bind:methods=methods v-bind:currentmethod=currentMethod v-bind:user=user v-bind:uids=uids></component>
+        	</div>
         </main>
         <footer></footer>
     </div>
