@@ -1,0 +1,16 @@
+{
+  "name": "vuejs",
+  "version": "0.0.1",
+  "description": "Test Vue.JS Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hakall/vuejs.git"
+  },
+  "devDependencies": {
+    "grunt": "1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
