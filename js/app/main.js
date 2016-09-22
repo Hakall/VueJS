@@ -13,44 +13,176 @@
 
 /** Vue.JS **/
 
+var PushMethod = Vue.extend({
+    props: {
+        'user': Object,
+        'messages': Object,
+    },
+    template: '#push-method'
+});
+
+var BypassMethod = Vue.extend({
+    props: {
+        'user': Object,
+        'messages': Object,
+    },
+    template: '#bypass-method'
+});
+
+var TotpMethod = Vue.extend({
+    props: {
+        'user': Object,
+        'generatetotp': Function,
+        'messages': Object,
+    },
+    template: '#totp-method'
+});
+
+var RandomCodeMethod = Vue.extend({
+    props: {
+        'user': Object,
+        'messages': Object,
+    },
+    template: '#random_code-method'
+});
+
 var UserDashboard = Vue.extend({
     props: {
+        'messages': Object,
         'methods': Object,
         'user': Object,
         'currentmethod': String
     },
-    template: '<div>' +
-        '<div class="section" v-for="method in methods" v-show="method.activate && currentmethod==method.name">' +
-        '<h5>{{method.name}}</h5>' +
-        '</div>' +
-        '<div class="divider"></div>'+
-        '<div class="section" v-show="methods[currentmethod].transports.length>0 && currentmethod!==\'push\' " >'+
-        '<h5>Transports</h5>'+
-        '<div v-if="user.transports.sms">'+
-        'Sms : {{user.transports.sms}}'+
-        '</div>'+
-        '<div v-if="user.transports.mail">'+
-        'Mail : {{user.transports.mail}}'+
-        '</div>'+
-        '</div>'+
-        '</div>'
+    components: {
+        "push": PushMethod,
+        "totp": TotpMethod,
+        "bypass": BypassMethod,
+        "random_code": RandomCodeMethod
+    },
+    template: "#user-dashboard",
+    methods: {
+        activate: function(event) {
+            switch (event.target.name) {
+                case 'push':
+                    this.activatePush();
+                    break;
+                case 'bypass':
+                    this.activateBypass();
+                    break;
+                case 'random_code':
+                    this.activateRandomCode();
+                    break;
+                case 'totp':
+                    this.activateTotp();
+                    break;
+                default:
+                    /** **/
+                    this.user.methods[event.target.name].active = true;
+                    break;
+            }
+        },
+        activatePush: function() {
+            console.log("activatePush");
+            //ajax
+        },
+        activateBypass: function() {
+            console.log("activateBypass");
+            this.user.methods.bypass.active = true;
+            this.generateBypass(function() {
+                this.user.methods.bypass.active = false;
+            })
+        },
+        activateTotp: function() {
+            console.log("activateTotp");
+            this.user.methods.totp.active = true;
+            this.generateTotp(function() {
+                this.user.methods.totp.active = false;
+            })
+        },
+        activateRandomCode: function() {
+            console.log("activateRandomCode");
+            this.user.methods.random_code.active = true;
+            $.ajax({
+                url: "/data/activate.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code != "Ok") this.user.methods.random_code.active = false;
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    if (data.code != "Ok") this.user.methods.random_code.active = false;
+                    console.error("/data/activate.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+        deactivate: function(event) {
+            console.log("deactivate " + event.target.name);
+            this.user.methods[event.target.name].active = false;
+            $.ajax({
+                url: "/data/deactivate.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code != "Ok") this.user.methods[event.target.name].active = true;
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    this.user.methods[event.target.name].active = true;
+                    console.error("/data/deactivate.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+        generateBypass: function(onError) {
+            $.ajax({
+                url: "/data/bypass-secret.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code == "Ok") this.user.methods.bypass.codes = data.codes;
+                    else if (typeof(onError) === "function") onError();
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    if (typeof(onError) === "function") onError();
+                    console.error("/data/bypass-secret.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+        generateTotp: function(onError) {
+            $.ajax({
+                url: "/data/totp-secret.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code == "Ok"){
+                        this.user.methods.totp.message = data.message;
+                        this.user.methods.totp.qrCode = data.qrCode;
+                        this.user.methods.totp.uid = data.uid;
+                    }
+                    else if (typeof(onError) === "function") onError();
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    if (typeof(onError) === "function") onError();
+                    console.error("/data/totp-secret.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+    }
 });
 
 var ManagerDashboard = Vue.extend({
     props: {
         'methods': Object,
+        'messages': Object,
         'uids': Array,
     },
-    template: '<div>ManagerDashboard!</div>'
+    template: '#manager-dashboard'
 });
 
 var AdminDashboard = Vue.extend({
     props: {
+        'messages': Object,
         'methods': Object
     },
-    template: '<div><div class="section" v-for="method in methods">' +
-        '<h5>{{method.name}}</h5>' +
-        '<div class="divider"></div></div></div>'
+    template: '#admin-dashboard'
 });
 
 //Vue.component('user-dashboard', UserDashboard);
@@ -71,9 +203,11 @@ var app = new Vue({
             methods: {},
             transports: {}
         },
-        uids: []
+        uids: [],
+        messages: {}
     },
     created: function() {
+        this.getMessages();
         this.getUser();
         this.getMethods();
     },
@@ -81,14 +215,25 @@ var app = new Vue({
         cleanMethods: function() {
             for (method in this.methods) {
                 if (method[0] == '_') delete this.methods[method];
-                else this.methods[method].name = method;
+                else {
+                    this.methods[method].name = method;
+                    if (this.messages.api) {
+                        if (this.messages.api.methods[method]) this.methods[method].label = this.messages.api.methods[method].name;
+                    }
+                }
             }
+
         },
 
         navigate: function(event) {
-            this.currentMethod = event.target.text;
-            this.currentView = event.target.name + '-dashboard';
-            if (event.target.name == "manager") this.getUsers();
+            if (event.target.name == "manager") {
+                this.getUsers();
+                this.currentView = 'manager-dashboard';
+            } else if (event.target.name == "admin") this.currentView = 'admin-dashboard';
+            else {
+                this.currentMethod = event.target.name;
+                this.currentView = 'user-dashboard';
+            }
         },
 
         getUsers: function() {
@@ -142,10 +287,26 @@ var app = new Vue({
                 }.bind(this)
             });
         },
-
         setMethods: function(data) {
             this.methods = data.methods;
             this.cleanMethods();
         },
+        getMessages: function() {
+            $.ajax({
+                url: "/data/messages.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    this.setMessages(data);
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("/data/messages.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+        setMessages: function(data) {
+            this.messages = data;
+            this.cleanMethods();
+        }
     }
 })

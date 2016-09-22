@@ -46,7 +46,7 @@ module.exports = function(grunt) {
           livereload: true,
         },
         src: {
-          files: ['js/*.js', 'css/**/*.scss', '**/*.json', '*.html','**/*.html','Gruntfile.js', 'views/*.jade'],
+          files: ['js/*.js', 'js/app/*.js', 'css/**/*.scss', '**/*.json', '*.html','**/*.html','Gruntfile.js', 'views/*.jade'],
           tasks: ['default'],
         }
       }

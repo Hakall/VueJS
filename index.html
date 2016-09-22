@@ -11,6 +11,90 @@
 </head>
 
 <body>
+    <script type="text/x-template" id="user-dashboard">
+        <div>
+            <div class="section" v-for="method in methods" v-show="method.activate && currentmethod==method.name">
+                <h5>{{method.label || method.name}}</h5>
+                <div class='switch'>
+                    <label>
+                        Deactivate
+                        <input type='checkbox' v-if="user.methods[method.name].active" v-on:click="deactivate" v-bind:name=method.name checked>
+                        <input type='checkbox' v-on:click="activate" v-bind:name=method.name v-else>
+                        <span class='lever'></span> Activate
+                    </label>
+                </div>
+                <br>
+                <div class="divider"></div>
+                <p>
+                    {{messages.api.methods[method.name].description}}
+                </p>
+                <div v-if="user.methods[method.name].active">
+                    <div class="divider"></div>
+                    <component :is=currentmethod v-bind:methods=methods generatetotp=generateTotp v-bind:messages=messages v-bind:user=user></component>
+                    <div v-if="methods[currentmethod]">
+                        <div class="section" v-show="methods[currentmethod].transports.length>0 && currentmethod!=='push' ">
+                            <div class="divider"></div>
+                            <h5>Transports</h5>
+                            <div v-if="user.transports.sms">
+                                Sms : {{user.transports.sms}}
+                            </div>
+                            <div v-if="user.transports.mail">
+                                Mail : {{user.transports.mail}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="push-method">
+        <div>
+            <ul>
+                <li>{{user.methods.push.device.platform}}</li>
+                <li>{{user.methods.push.device.manufacturer}}</li>
+                <li>{{user.methods.push.device.model}}</li>
+            </ul>
+        </div>
+    </script>
+    <script type="text/x-template" id="bypass-method">
+        <div>
+            <a class="waves-effect waves-light btn" v-on:click=generatetotp>Générer des nouveaux codes</a>
+            <ul>
+                <li>Code restants : {{user.methods.bypass.available_code}}</li>
+                <li>Code utilisés : {{user.methods.bypass.used_code}}</li>
+                <li v-for="code in user.methods.bypass.codes">{{code}}</li>
+            </ul>
+        </div>
+    </script>
+    <script type="text/x-template" id="totp-method">
+        <div>
+            {{messages.api.methods.totp.howTo}}
+            <ul>
+                <li v-html="user.methods.totp.qrCode"></li>
+                <li>{{user.methods.totp.message}}</li>
+            </ul>
+        </div>
+    </script>
+    <script type="text/x-template" id="random_code-method">
+        <div>
+            Random code
+        </div>
+    </script>
+    <script type="text/x-template" id="manager-dashboard">
+        <div>
+            Manager Dashboard!
+        </div>
+    </script>
+    <script type="text/x-template" id="admin-dashboard">
+        <div>
+            <div>
+                <div class="section" v-for="method in methods">
+                    <h5>{{method.label || method.name}}</h5>
+                    <div class="divider"></div>
+                </div>
+            </div>
+        </div>
+    </script>
     <div id="app">
         <header>
             <a href="#" data-activates="slide-out" class="button-collapse top-nav full hide-on-large-only"><i class="fa fa-bars"></i></a>
@@ -22,7 +106,7 @@
                             <div class="collapsible-body">
                                 <ul>
                                     <li v-for="method in methods" v-show="method.activate" class="bold">
-                                    	<a href="#" v-on:click="navigate" name="user" >{{method.name}}</a>
+                                        <a href="#" v-on:click="navigate" v-bind:name=method.name>{{method.label || method.name}}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -30,21 +114,23 @@
                     </ul>
                 </li>
                 <li class="bold">
-                	<a href="#" v-on:click="navigate" name="manager">Manager</a>
+                    <a href="#" v-on:click="navigate" name="manager">Manager</a>
                 </li>
                 <li class="bold">
-                	<a href="#" v-on:click="navigate" name="admin">Admin</a>
+                    <a href="#" v-on:click="navigate" name="admin">Admin</a>
                 </li>
             </ul>
         </header>
         <main>
-        	<div class="container">
-        		<component :is="currentView" v-bind:methods=methods v-bind:currentmethod=currentMethod v-bind:user=user v-bind:uids=uids></component>
-        	</div>
+            <div class="container">
+                <component :is="currentView" v-bind:methods=methods v-bind:messages=messages v-bind:currentmethod=currentMethod v-bind:user=user v-bind:uids=uids></component>
+            </div>
         </main>
         <footer></footer>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    </script>
+    <script src="js/jquery.min.js"></script>
     <script src="js/materialize.min.js"></script>
     <script type="text/javascript" src='js/vue.js'></script>
     <script type="text/javascript" src='js/app.js'></script>
