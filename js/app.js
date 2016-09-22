@@ -1,21 +1,18 @@
 /** jQuery Initialisation **/
 (function($) {
     $(function() {
-
         $('.button-collapse').sideNav({ 'edge': 'left' });
-
         $('.collapsible').collapsible({
             accordion: false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });
-
     }); // end of document ready
 })(jQuery); // end of jQuery name space
 
 /** Vue.JS **/
-
 var PushMethod = Vue.extend({
     props: {
         'user': Object,
+        'activate_push': Function,
         'messages': Object,
     },
     template: '#push-method'
@@ -65,59 +62,108 @@ var UserDashboard = Vue.extend({
         activate: function(event) {
             switch (event.target.name) {
                 case 'push':
-                    this.activatePush();
+                    this.askPushActivation(event);
                     break;
                 case 'bypass':
-                    this.activateBypass();
+                    this.activateBypass(event);
                     break;
                 case 'random_code':
-                    this.activateRandomCode();
+                    this.activateRandomCode(event);
                     break;
                 case 'totp':
-                    this.activateTotp();
+                    this.activateTotp(event);
                     break;
                 default:
                     /** **/
+                    event.target.checked = true;
                     this.user.methods[event.target.name].active = true;
                     break;
             }
         },
-        activatePush: function() {
+        activatePush: function(event) {
             console.log("activatePush");
             //ajax
+            $.ajax({
+                url: "/data/push-infos.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code == "Ok") {
+                        event.target.checked = true;
+                        this.user.methods.push.active = true;
+                        console.log(data);
+                        this.user.methods.push.device.manufacturer = data.device.manufacturer;
+                        this.user.methods.push.device.model = data.device.model;
+                        this.user.methods.push.device.platform = data.device.platform;
+                    }
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    event.target.checked = false;
+                    this.user.methods.push.active = false;
+                    console.error("/data/push-infos.json", status, err.toString());
+                }.bind(this)
+            });
         },
-        activateBypass: function() {
-            console.log("activateBypass");
+        askPushActivation: function(event) {
+            console.log("askPushActivation");
+            event.target.checked = false;
+            this.user.methods.push.active = false;
+            //ajax
+            $.ajax({
+                url: "/data/push-activation.json",
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    if (data.code == "Ok") {
+                        this.user.methods.push.activationCode = data.activationCode;
+                        this.user.methods.push.qrCode = data.qrCode;
+                        this.user.methods.push.api_url = data.api_url;
+                    }
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("/data/push-activation.json", status, err.toString());
+                }.bind(this)
+            });
+        },
+        activateBypass: function(event) {
             this.user.methods.bypass.active = true;
+            event.target.checked = true;
             this.generateBypass(function() {
                 this.user.methods.bypass.active = false;
+                event.target.checked = false;
             })
         },
-        activateTotp: function() {
-            console.log("activateTotp");
+        activateTotp: function(event) {
             this.user.methods.totp.active = true;
+            event.target.checked = true;
             this.generateTotp(function() {
                 this.user.methods.totp.active = false;
+                event.target.checked = false;
             })
         },
-        activateRandomCode: function() {
-            console.log("activateRandomCode");
+        activateRandomCode: function(event) {
             this.user.methods.random_code.active = true;
+            event.target.checked = true;
             $.ajax({
                 url: "/data/activate.json",
                 dataType: 'json',
                 cache: false,
                 success: function(data) {
-                    if (data.code != "Ok") this.user.methods.random_code.active = false;
+                    if (data.code != "Ok") {
+                        this.user.methods.random_code.active = false;
+                        event.target.checked = false;
+                    }
                 }.bind(this),
                 error: function(xhr, status, err) {
-                    if (data.code != "Ok") this.user.methods.random_code.active = false;
+                    this.user.methods.random_code.active = false;
+                    event.target.checked = false;
                     console.error("/data/activate.json", status, err.toString());
                 }.bind(this)
             });
         },
         deactivate: function(event) {
             console.log("deactivate " + event.target.name);
+            event.target.checked = false;
             this.user.methods[event.target.name].active = false;
             $.ajax({
                 url: "/data/deactivate.json",
@@ -128,6 +174,7 @@ var UserDashboard = Vue.extend({
                 }.bind(this),
                 error: function(xhr, status, err) {
                     this.user.methods[event.target.name].active = true;
+                    event.target.checked = true;
                     console.error("/data/deactivate.json", status, err.toString());
                 }.bind(this)
             });
@@ -153,12 +200,11 @@ var UserDashboard = Vue.extend({
                 dataType: 'json',
                 cache: false,
                 success: function(data) {
-                    if (data.code == "Ok"){
+                    if (data.code == "Ok") {
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = data.qrCode;
                         this.user.methods.totp.uid = data.uid;
-                    }
-                    else if (typeof(onError) === "function") onError();
+                    } else if (typeof(onError) === "function") onError();
                 }.bind(this),
                 error: function(xhr, status, err) {
                     if (typeof(onError) === "function") onError();
@@ -185,8 +231,6 @@ var AdminDashboard = Vue.extend({
     },
     template: '#admin-dashboard'
 });
-
-//Vue.component('user-dashboard', UserDashboard);
 
 var app = new Vue({
     el: '#app',

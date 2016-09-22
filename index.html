@@ -28,9 +28,9 @@
                 <p>
                     {{messages.api.methods[method.name].description}}
                 </p>
-                <div v-if="user.methods[method.name].active">
+                <div v-show="user.methods[method.name].active || typeof(user.methods[method.name].activationCode)=='string'">
                     <div class="divider"></div>
-                    <component :is=currentmethod v-bind:methods=methods v-bind:generate_totp=generateTotp v-bind:generate_bypass=generateBypass v-bind:messages=messages v-bind:user=user></component>
+                    <component :is=currentmethod v-bind:methods=methods v-bind:generate_totp=generateTotp v-bind:generate_bypass=generateBypass v-bind:activate_push=activatePush v-bind:messages=messages v-bind:user=user></component>
                     <div v-if="methods[currentmethod]">
                         <div class="section" v-show="methods[currentmethod].transports.length>0 && currentmethod!=='push' ">
                             <div class="divider"></div>
@@ -49,6 +49,13 @@
     </script>
     <script type="text/x-template" id="push-method">
         <div>
+            <ul v-if="!user.methods.push.active">
+                <a class="waves-effect waves-light btn" v-on:click=activate_push>Activer</a>
+                <li v-html="user.methods.push.qrCode"></li>
+                <li>{{user.uid}}</li>
+                <li>{{user.methods.push.activationCode}}</li>
+                <li>{{user.methods.push.api_url}}</li>
+            </ul>
             <ul>
                 <li>{{user.methods.push.device.platform}}</li>
                 <li>{{user.methods.push.device.manufacturer}}</li>
@@ -58,12 +65,12 @@
     </script>
     <script type="text/x-template" id="bypass-method">
         <div>
-            <a class="waves-effect waves-light btn" v-on:click=generate_bypass>Générer des nouveaux codes</a>
             <ul>
                 <li>Code restants : {{user.methods.bypass.available_code}}</li>
                 <li>Code utilisés : {{user.methods.bypass.used_code}}</li>
                 <li v-for="code in user.methods.bypass.codes">{{code}}</li>
             </ul>
+            <a class="waves-effect waves-light btn" v-on:click=generate_bypass>Générer des nouveaux codes</a>
         </div>
     </script>
     <script type="text/x-template" id="totp-method">
@@ -73,6 +80,7 @@
                 <li v-html="user.methods.totp.qrCode"></li>
                 <li>{{user.methods.totp.message}}</li>
             </ul>
+            <a class="waves-effect waves-light btn" v-on:click=generate_totp>Générer un nouveau QrCode</a>
         </div>
     </script>
     <script type="text/x-template" id="random_code-method">

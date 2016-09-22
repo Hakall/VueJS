@@ -26,6 +26,9 @@
             "push": {
                 "device": {},
                 "active": false,
+                "activationCode": {},
+                "qrCode": {},
+                "api_url": {},
                 "transports": ["push"]
             }
         },
