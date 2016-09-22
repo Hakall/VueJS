@@ -24,6 +24,7 @@ var PushMethod = Vue.extend({
 var BypassMethod = Vue.extend({
     props: {
         'user': Object,
+        'generate_bypass': Function,
         'messages': Object,
     },
     template: '#bypass-method'
@@ -32,7 +33,7 @@ var BypassMethod = Vue.extend({
 var TotpMethod = Vue.extend({
     props: {
         'user': Object,
-        'generatetotp': Function,
+        'generate_totp': Function,
         'messages': Object,
     },
     template: '#totp-method'

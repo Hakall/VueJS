@@ -30,7 +30,7 @@
                 </p>
                 <div v-if="user.methods[method.name].active">
                     <div class="divider"></div>
-                    <component :is=currentmethod v-bind:methods=methods generatetotp=generateTotp v-bind:messages=messages v-bind:user=user></component>
+                    <component :is=currentmethod v-bind:methods=methods v-bind:generate_totp=generateTotp v-bind:generate_bypass=generateBypass v-bind:messages=messages v-bind:user=user></component>
                     <div v-if="methods[currentmethod]">
                         <div class="section" v-show="methods[currentmethod].transports.length>0 && currentmethod!=='push' ">
                             <div class="divider"></div>
@@ -58,7 +58,7 @@
     </script>
     <script type="text/x-template" id="bypass-method">
         <div>
-            <a class="waves-effect waves-light btn" v-on:click=generatetotp>Générer des nouveaux codes</a>
+            <a class="waves-effect waves-light btn" v-on:click=generate_bypass>Générer des nouveaux codes</a>
             <ul>
                 <li>Code restants : {{user.methods.bypass.available_code}}</li>
                 <li>Code utilisés : {{user.methods.bypass.used_code}}</li>
