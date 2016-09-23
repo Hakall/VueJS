@@ -1,0 +1,43 @@
+{
+    "code": "Ok",
+    "message": "",
+    "user": {
+        "methods": {
+            "codeRequired": false,
+            "waitingFor": true,
+            "totp": {
+                "active": false,
+                "message": "",
+                "qrCode": "",
+                "uid": "",
+                "transports": ["sms"]
+            },
+            "random_code": {
+                "active": false,
+                "transports": ["sms", "mail"]
+            },
+            "bypass": {
+                "active": false,
+                "available_code": 10,
+                "used_code": 0,
+                "transports": [],
+                "codes": []
+            },
+            "push": {
+                "device": {},
+                "active": true,
+                "activationCode": {},
+                "qrCode": {},
+                "api_url": {},
+                "transports": ["push"]
+            }
+        },
+        "transports": {
+            "mail": "abou**********il.com",
+            "sms": "06******590",
+            "push": "Android Push"
+        }
+    },
+    "uid": "alex",
+    "api_url": "http://casotp.univ-lr.fr:3000/"
+}
