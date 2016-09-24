@@ -98,25 +98,19 @@
     <!--    ManagerDashboard  -->
     <script type="text/x-template" id="manager-dashboard">
         <div>
-            <div class="row">
-                <div class="col s12">
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <i class="material-icons prefix">account_box</i>
-                            <input v-on:keyup="suggest" type="text" id="autocomplete-input" class="autocomplete">
-                            <label for="autocomplete-input">Utilisateur</label>
-                        </div>
-                    </div>
-                    <ul v-show="focus">
-                        <li v-for="uid in suggestions">
-                            <p v-on:click="getUser(uid)">{{uid}}</p>
-                            <div class="divider"></div>
-                        </li>
-                    </ul>
-                    <div v-show="user.uid && !focus">
-                        <user-view v-bind:methods=methods v-bind:user=user v-bind:messages=messages></user-view>
-                    </div>
+            <div class="row input-field">
+                <div class="col s8">
+                    <i class="material-icons prefix">account_box</i>
+                    <input v-on:keyup.enter="search" v-on:keyup="suggest" type="text" id="autocomplete-input" list="usersId">
+                    <label for="autocomplete-input">Utilisateur</label>
                 </div>
+                <a class="waves-effect waves-light btn col s4">Chercher</a>
+                <datalist id="usersId">
+                    <option v-for="uid in suggestions" v-bind:value="uid">
+                </datalist>
+            </div>
+            <div v-show="user.uid">
+                <user-view v-bind:methods=methods v-bind:user=user v-bind:messages=messages></user-view>
             </div>
         </div>
     </script>
@@ -124,6 +118,7 @@
     <script type="text/x-template" id="user-view">
         <div>
             <ul>
+                <h4 v-if="user.uid != 'function String() { [native code] }'">{{user.uid}}</h4>
                 <li v-for="method in methods" v-if="user.methods[method.name] && methods[method.name].activate">
                     <h5>{{method.label}}</h5>
                     <div class='switch'>
@@ -190,7 +185,7 @@
     <!--    end Templates  -->
     <!--    #############  -->
     <!--    App  -->
-    <div id="app">
+    <div id="app" class="container">
         <header>
             <a href="#" data-activates="slide-out" class="button-collapse top-nav full hide-on-large-only"><i class="material-icons">menu</i></a>
             <ul id="slide-out" class="side-nav fixed">

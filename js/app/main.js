@@ -403,7 +403,6 @@ var ManagerDashboard = Vue.extend({
                 methods: Object,
                 transports: Object
             },
-            focus: false,
             uids: Array,
         }
     },
@@ -417,9 +416,16 @@ var ManagerDashboard = Vue.extend({
                 for (uid in this.uids) {
                     if (this.uids[uid].includes(event.target.value)) this.suggestions.push(this.uids[uid]);
                 }
-                this.focus = true;
             }
         },
+        
+        search: function(event) {
+            if (event.target.value !== "" && this.suggestions.includes(event.target.value)) {
+                this.getUser(event.target.value);
+                event.target.value = "";
+            }
+        },
+
         getUsers: function() {
             $.ajax({
                 url: "/data/users.json",
@@ -439,7 +445,6 @@ var ManagerDashboard = Vue.extend({
         },
 
         getUser: function(uid) {
-            this.focus = false;
             $.ajax({
                 url: "/data/alex.json",
                 dataType: 'json',
@@ -448,7 +453,6 @@ var ManagerDashboard = Vue.extend({
                     this.setUser(data);
                 }.bind(this),
                 error: function(xhr, status, err) {
-                    this.focus = true;
                     console.error("/data/alex.json", status, err.toString());
                 }.bind(this)
             });
