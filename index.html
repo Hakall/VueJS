@@ -104,7 +104,7 @@
                     <input v-on:keyup.enter="search" v-on:keyup="suggest" type="text" id="autocomplete-input" list="usersId">
                     <label for="autocomplete-input">Utilisateur</label>
                 </div>
-                <a class="waves-effect waves-light btn col s4">Chercher</a>
+                <a class="waves-effect waves-light btn col s4" v-on:click="search">Chercher</a>
                 <datalist id="usersId">
                     <option v-for="uid in suggestions" v-bind:value="uid">
                 </datalist>

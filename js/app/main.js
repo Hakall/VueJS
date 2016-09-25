@@ -420,9 +420,9 @@ var ManagerDashboard = Vue.extend({
         },
         
         search: function(event) {
-            if (event.target.value !== "" && this.suggestions.includes(event.target.value)) {
-                this.getUser(event.target.value);
-                event.target.value = "";
+            if ($('#autocomplete-input').val() !== "" && this.suggestions.includes($('#autocomplete-input').val())) {
+                this.getUser($('#autocomplete-input').val());
+                $('#autocomplete-input').val('');
             }
         },
 
