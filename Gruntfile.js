@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                     style: 'expanded'
                 },
                 files: {
-                    'css/index.css': 'css/sass/*.scss',
+                    'css/style.css': 'css/sass/*.scss',
                 }
             },
             prod: {
@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     style: 'compressed'
                 },
                 files: {
-                    'css/index.min.css': 'css/sass/*.scss'
+                    'css/style.min.css': 'css/sass/*.scss'
                 }
             }
         },

@@ -418,7 +418,7 @@ var ManagerDashboard = Vue.extend({
                 }
             }
         },
-        
+
         search: function(event) {
             if ($('#autocomplete-input').val() !== "" && this.suggestions.includes($('#autocomplete-input').val())) {
                 this.getUser($('#autocomplete-input').val());
@@ -559,16 +559,26 @@ var AdminDashboard = Vue.extend({
     }
 });
 
+/** Admin **/
+var Home = Vue.extend({
+    props: {
+        messages: Object
+    },
+    template: '#home-dashboard'
+});
+
 /** Main **/
 var app = new Vue({
     el: '#app',
     components: {
+        "home": Home,
         "user-dashboard": UserDashboard,
         "manager-dashboard": ManagerDashboard,
         "admin-dashboard": AdminDashboard
     },
     data: {
-        currentView: 'user-dashboard',
+        pageTitle: 'Accueil',
+        currentView: 'home',
         currentMethod: '',
         methods: {},
         user: {
@@ -600,12 +610,22 @@ var app = new Vue({
 
         navigate: function(event) {
             if (event.target.name == "manager") {
+                this.pageTitle = event.target.text;
                 this.currentView = 'manager-dashboard';
-            } else if (event.target.name == "admin") this.currentView = 'admin-dashboard';
-            else {
+            } else if (event.target.name == "admin") {
+                this.currentView = 'admin-dashboard';
+                this.pageTitle = event.target.text;
+            } else if (event.target.name == "home") {
+                this.currentView = 'home';
+                this.pageTitle = event.target.text;
+            } else {
+                this.pageTitle = "Préférences";
                 this.currentMethod = event.target.name;
                 this.currentView = 'user-dashboard';
             }
+            $('a').parent().removeClass('active');
+            $('#' + event.target.name).parent().addClass('active');
+            if(document.getElementById("sidenav-overlay"))$('#navButton').click();
         },
 
         getUser: function() {

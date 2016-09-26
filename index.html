@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <link href="css/material-icons.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="css/materialize.min.css" media="screen,projection">
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/materialize.min.css" media="screen,projection">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VueJS</title>
 </head>
@@ -181,14 +181,41 @@
             </div>
         </div>
     </script>
+    <!--    Home  -->
+    <script type="text/x-template" id="home-dashboard">
+        <div>
+            <div v-if="messages.api">
+                <h4>ESUP OTP MANAGER</h4>
+                <p>
+                    {{messages.api.home}}
+                </p>
+            </div>
+        </div>
+    </script>
     <!--    #############  -->
     <!--    end Templates  -->
     <!--    #############  -->
     <!--    App  -->
     <div id="app" class="container">
         <header>
-            <a href="#" data-activates="slide-out" class="button-collapse top-nav full hide-on-large-only"><i class="material-icons">menu</i></a>
+            <nav class="top-nav">
+                <div class="container">
+                    <a href="#" data-activates="slide-out" class="button-collapse top-nav full hide-on-large-only" id="navButton"><i class="material-icons">menu</i></a>
+                    <div class="nav-wrapper">
+                        <a class="page-title">{{pageTitle}}</a>
+                    </div>
+                </div>
+            </nav>
             <ul id="slide-out" class="side-nav fixed">
+                <div class="no-padding sidenav-header">
+                    <div class="flex">
+                        <i class="material-icons medium">account_circle</i>
+                        <p>{{user.uid}}</p>
+                    </div>
+                </div>
+                <li class="bold">
+                    <a href="#" v-on:click="navigate" id="home" name="home">Accueil</a>
+                </li>
                 <li class="no-padding">
                     <ul class="collapsible collapsible-accordion" data-collapsible="accordion">
                         <li>
@@ -196,7 +223,7 @@
                             <div class="collapsible-body">
                                 <ul>
                                     <li v-for="method in methods" v-show="method.activate" class="bold">
-                                        <a href="#" v-on:click="navigate" v-bind:name=method.name>{{method.label || method.name}}</a>
+                                        <a href="#" v-on:click="navigate" v-bind:id=method.name v-bind:name=method.name>{{method.label || method.name}}</a>
                                     </li>
                                 </ul>
                             </div>
@@ -204,12 +231,16 @@
                     </ul>
                 </li>
                 <li class="bold">
-                    <a href="#" v-on:click="navigate" name="manager">Manager</a>
+                    <a href="#" v-on:click="navigate" id="manager" name="manager">Manager</a>
                 </li>
                 <li class="bold">
-                    <a href="#" v-on:click="navigate" name="admin">Admin</a>
+                    <a href="#" v-on:click="navigate" id="admin" name="admin">Admin</a>
                 </li>
-            </ul>
+                <div class="divider"></div>
+                <li class="bold flex waves-effect" style="display: flex !important;">
+                    <i class="material-icons prefix">exit_to_app</i> <a href="/logout">Se déconnecter</a>
+                </li>
+            </ul> 
         </header>
         <main>
             <div class="container">
